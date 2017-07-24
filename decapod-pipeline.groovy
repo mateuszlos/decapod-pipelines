@@ -5,26 +5,24 @@ timestamps {
         try {
             def saltMaster
             stage('Connect to Salt API') {
-                saltMasterHost = SALT_MASTER_IP
-                saltPort = SALT_MASTER_PORT
-                SALT_MASTER_URL = "http://${saltMasterHost}:${saltPort}"
-                saltMaster = salt.connection(SALT_MASTER_URL, SALT_MASTER_CREDENTIALS)
+              saltMasterHost = SALT_MASTER_IP
+              saltPort = SALT_MASTER_PORT
+              SALT_MASTER_URL = "http://${saltMasterHost}:${saltPort}"
+              saltMaster = salt.connection(SALT_MASTER_URL, SALT_MASTER_CREDENTIALS)
             }
 
             stage('Install decapod') {
-                salt.enforceState(saltMaster, 'I@salt:master', ['decapod.libs'], true)
-                salt.enforceState(saltMaster, 'I@salt:master', ['decapod.server'], true)
-            }
-
-            stage('Configure nodes') {
-                salt.runSaltProcessStep(saltMaster, 'ceph*', 'saltutil.sync_all', [], null, true)
-                salt.runSaltProcessStep(saltMaster, 'ceph*', 'mine.send', ['grains.items'], null, true)
-                salt.runSaltProcessStep(saltMaster, 'ceph*', 'mine.send', ['network.get_hostname'], null, true)
-                salt.enforceState(saltMaster, 'ceph*', ['decapod.discover'], true)
+              salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.libs'])
+              salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.server'])
             }
 
             stage('Deploy ceph cluster') {
-                salt.enforceState(saltMaster, 'I@salt:master', ['decapod.configure_cluster'], true)
+              salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.configure_cluster'])
+            }
+
+            stage('Update radosgw configuration') {
+
+              salt.runSaltProcessStep(saltMaster, 'ceph-mon*', ['decapod.update_radosgw_conf'])
             }
 
         } catch (Throwable e) {
