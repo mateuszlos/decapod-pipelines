@@ -11,8 +11,8 @@ timestamps {
                 saltMaster = salt.connection(SALT_MASTER_URL, SALT_MASTER_CREDENTIALS)
             }
 
-            stage('Configure monitors') {
-                salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.add_mon'])
+            stage('add monitors') {
+                salt.enforceState(saltMaster, 'I@salt:master', ['decapod.add_mon'])
             }
 
         } catch (Throwable e) {

@@ -12,18 +12,13 @@ timestamps {
             }
 
             stage('Install decapod') {
-              salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.libs'])
-              salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.server'])
+              salt.enforceState(saltMaster, 'I@salt:master', ['decapod.server'])
             }
 
             stage('Deploy ceph cluster') {
-              salt.runSaltProcessStep(saltMaster, 'I@salt:master', ['decapod.configure_cluster'])
+              salt.enforceState(saltMaster, 'I@salt:master', ['decapod.configure_cluster'])
             }
 
-            stage('Update radosgw configuration') {
-
-              salt.runSaltProcessStep(saltMaster, 'ceph-mon*', ['decapod.update_radosgw_conf'])
-            }
 
         } catch (Throwable e) {
             currentBuild.result = 'FAILURE'

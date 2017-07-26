@@ -8,12 +8,11 @@ timestamps {
                 saltMasterHost = SALT_MASTER_IP
                 saltPort = SALT_MASTER_PORT
                 SALT_MASTER_URL = "http://${saltMasterHost}:${saltPort}"
-                NODES_LIST = ""
                 saltMaster = salt.connection(SALT_MASTER_URL, SALT_MASTER_CREDENTIALS)
             }
 
             stage('delete monitors') {
-                 salt.runSaltProcessStep(saltMaster, 'I@salt:master', 'state.sls', 'decapod.del_mon', "  pillar=\'{"decapod_lcm": "del_mon": [${NODES_LIST}]}\'")
+                 salt.enforceState(saltMaster, 'I@salt:master', ['decapod.del_mon'])
             }
 
         } catch (Throwable e) {

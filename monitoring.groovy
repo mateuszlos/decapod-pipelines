@@ -12,11 +12,11 @@ timestamps {
             }
 
             stage('Configure telegraf integration') {
-                salt.runSaltProcessStep(saltMaster, 'I@salt:master', 'decapod.telegraf')
+                salt.enforceState(saltMaster, 'I@salt:master', ['decapod.telegraf'])
             }
 
             stage('Update telegraf configuration') {
-                salt.runSaltProcessStep(saltMaster, 'ceph*', 'decapod.update_telegraf_conf')
+                salt.enforceState(saltMaster, 'ceph*', ['decapod.update_telegraf_conf'])
             }
 
         } catch (Throwable e) {
